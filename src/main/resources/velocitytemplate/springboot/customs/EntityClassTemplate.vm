@@ -1,0 +1,38 @@
+#set($packageNameSuffix=".entity")
+#set($lbrackets="(")
+#set($rbrackets=")")
+package $_table.packageName$packageNameSuffix;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
+public class $_table.className implements Serializable {
+	
+	private static final long serialVersionUID = -1;
+	
+	#foreach($column in $_table.columns)
+	
+	public $column.javaDataType get$column.fieldNameHeadUpper$lbrackets$rbrackets{
+		return $column.fieldName;
+	}
+	
+	public void set$column.fieldNameHeadUpper$lbrackets$column.javaDataType $column.fieldName$rbrackets{
+		this.$column.fieldName = $column.fieldName ;
+	}
+	#end
+	
+	public String toString() {
+		return ReflectionToStringBuilder.toString(this);
+	}
+	
+	#foreach($column in $_table.columns)
+	
+	/**
+	* $column.columnComment
+	**/
+	private $column.javaDataType $column.fieldName;
+	#end
+
+}

@@ -1,0 +1,19 @@
+#set($packageNameSuffix=".constant")
+#set($lbrackets="(")
+#set($rbrackets=")")
+package $_table.packageName$packageNameSuffix;
+
+
+import com.oneconnect.sme.foundation.constant.MessageConstant;
+
+public class $_table.className extends MessageConstant{
+	
+	#foreach($column in $_table.columns)
+	
+	/**
+	* $column.columnComment
+	**/
+	public static final String $column.fieldName.toUpperCase()="$column.fieldName.toUpperCase()";
+	#end
+
+}

@@ -1,0 +1,47 @@
+#set($packageNameSuffix=".service")
+#set($entityPackage=$_table.packageName + ".entity." + $_table.className)
+#set($interfaceName="I" + $_table.className + "Service")
+#set($lb="(")
+#set($rb=")")
+#set($primaryKey=$_table.columns.get(0))
+
+package $_table.packageName$packageNameSuffix;
+
+import com.github.pagehelper.Page;
+
+import com.oneconnect.sme.foundation.entity.PageRequest;
+import $entityPackage;
+
+public interface $interfaceName {
+
+	/**
+	* 主键查询
+	*/
+	public $_table.className queryByPK($primaryKey.javaDataType $primaryKey.fieldName);
+
+    /**
+	* 分页查询
+	*/
+	#set($queryPageMethod="query"+$_table.className+"Page")
+	public Page<$_table.className> $queryPageMethod(PageRequest<$_table.className> pageReq);
+
+    /**
+	* 新增
+	*/
+    #set($addObjMethod="add"+$_table.className)
+    public Integer $addObjMethod($_table.className obj);
+	
+	/**
+	* 修改
+	*/
+	#set($updateObjMethod="update"+$_table.className)
+   public Integer $updateObjMethod(Integer $primaryKey.fieldName , $_table.className obj);
+
+	/**
+	* 删除
+	*/
+    public Integer deleteByPK($primaryKey.javaDataType $primaryKey.fieldName);
+
+
+}
+

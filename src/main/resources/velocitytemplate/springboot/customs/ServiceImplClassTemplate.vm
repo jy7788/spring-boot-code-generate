@@ -1,0 +1,108 @@
+#set($packageNameSuffix=".service.impl")
+#set($interfaceName="I" + $_table.className + "Service")
+#set($className=$_table.className + "ServiceImpl")
+
+#set($mapperClass="I" + $_table.className + "Mapper")
+#set($mapperInstance=$_table.classNameHeadLower + "Mapper")
+#set($entityPackage=$_table.packageName + ".entity." + $_table.className)
+#set($mapperPackage=$_table.packageName + ".mapper." + $mapperClass)
+#set($servicePackage=$_table.packageName + ".service.I" + $_table.className + "Service")
+
+#set($lb="(")
+#set($rb=")")
+#set($primaryKey=$_table.columns.get(0))
+
+package $_table.packageName$packageNameSuffix;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.github.pagehelper.Page;
+import com.oneconnect.sme.foundation.constant.MessageConstant;
+import com.oneconnect.sme.foundation.entity.PageRequest;
+import com.oneconnect.sme.foundation.exception.BaseException;
+import $entityPackage;
+import $servicePackage;
+import $mapperPackage;
+
+@Service
+public class $className implements $interfaceName {
+
+	/**
+	* 主键查询
+	*/
+	#set($queryPageMethod="queryByPK")
+	@Override
+	public $_table.className queryByPK($primaryKey.javaDataType $primaryKey.fieldName){
+		return $mapperInstance.$queryPageMethod$lb $primaryKey.fieldName $rb;
+	}
+
+    /**
+	* 分页查询
+	*/
+	#set($queryPageMethod="query"+$_table.className+"Page")
+	@Override
+	public Page<$_table.className> $queryPageMethod(PageRequest<$_table.className> pageReq){
+		
+		return $mapperInstance.$queryPageMethod(pageReq.getTemplate(),pageReq.getOrderBy(),pageReq.getRowBounds());
+	}
+
+    /**
+	* 新增
+	*/
+    #set($addObjMethod="add"+$_table.className)
+    @Override
+    @Transactional( rollbackFor = RuntimeException.class)
+    public Integer $addObjMethod($_table.className obj){
+		int count = $mapperInstance.$addObjMethod$lb obj $rb;
+		
+		if (count < 1) {
+			throw new BaseException(MessageConstant.A000002);
+		}
+		
+		return count;
+	}
+	
+	/**
+	* 修改
+	*/
+	#set($updateObjMethod="update"+$_table.className)
+	@Override
+    @Transactional( rollbackFor = RuntimeException.class)
+   	public Integer $updateObjMethod(Integer $primaryKey.fieldName , $_table.className obj){
+		Integer count = $mapperInstance.$updateObjMethod$lb $primaryKey.fieldName , obj $rb;
+		
+		if (count < 1) {
+			throw new BaseException(MessageConstant.A000002);
+		}
+		
+		return count;
+	}
+
+	/**
+	* 删除
+	*/
+	#set($deleteMethod="deleteByPK")
+	@Override
+    @Transactional( rollbackFor = RuntimeException.class)
+    public Integer $deleteMethod$lb$primaryKey.javaDataType $primaryKey.fieldName$rb{
+		Integer count = $mapperInstance.$deleteMethod$lb $primaryKey.fieldName $rb;
+		
+		if (count < 1) {
+			throw new BaseException(MessageConstant.A000002);
+		}
+		
+		return count;
+	}
+	
+	@Autowired
+	private $mapperClass $mapperInstance;
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+
+}
+

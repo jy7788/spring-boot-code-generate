@@ -1,0 +1,112 @@
+#set($packageNameSuffix=".mapper")
+#set($entityPackage=$_table.packageName + ".entity." + $_table.className)
+#set($interfaceName="I" + $_table.className + "Mapper")
+#set($dynaClassName= $_table.className +"DynaSqlProvider")
+#set($dynaClassType= $dynaClassName +".class")
+#set($dynaPackage=$_table.packageName +  ".mapper.provider." + $dynaClassName)
+#set($lb="(")
+#set($rb=")")
+#set($date="Date")
+#set($primaryKey=$_table.columns.get(0))
+
+#set($columnsNames="")
+#set($fieldHolders="")
+#set($updatePKHolders="")
+#set($updateFieldHolders="")
+#foreach( $column in $_table.columns)
+	#if($primaryKey.fieldName.equals($column.fieldName))
+		#set($updatePKHolders = $primaryKey.columnName + " = #{" + $primaryKey.fieldName + "}")
+	#else
+		#set($columnsNames = $columnsNames + $column.columnName+",")
+		#set($fieldHolders = $fieldHolders + "#{" + $column.fieldName+ "},")
+		#set($updateFieldHolders = $updateFieldHolders + $column.columnName + " = #{obj." + $column.fieldName + "},")
+	#end
+#end
+#set($columnsNames = $columnsNames.substring(0, $columnsNames.lastIndexOf(',')))
+#set($fieldHolders = $fieldHolders.substring(0, $fieldHolders.lastIndexOf(',')))
+#set($updateFieldHolders = $updateFieldHolders.substring(0, $updateFieldHolders.lastIndexOf(',')))
+
+package $_table.packageName$packageNameSuffix;
+
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.InsertProvider;
+import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.SelectKey;
+import org.apache.ibatis.annotations.SelectProvider;
+import org.apache.ibatis.annotations.UpdateProvider;
+import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
+
+import com.github.pagehelper.Page;
+
+import $entityPackage;
+import $dynaPackage;
+
+/**
+ * TODO 
+ * <strong>补充当前类描述</strong>
+ * 
+ * @version 0.0.1
+ * @author 待替换  
+ * @see Mybatis <strong>注解使用</strong><br/> 
+ * 		http://www.mybatis.org/mybatis-3/zh/java-api.html
+ */
+public interface $interfaceName {
+
+	/**
+	* 根据主键查询
+	* @param $primaryKey.fieldName 主键
+	* @return 
+	*/
+	@Select("SELECT * FROM $_table.tableName WHERE id = #{id}")
+    @Options(useCache = false)
+    @Results({
+    	#foreach( $column in $_table.columns)
+    	@Result(property = "$column.fieldName", column = "$column.columnName"),
+    	#end
+    })
+    public $_table.className queryByPK($primaryKey.javaDataType $primaryKey.fieldName);
+	
+	/**
+	* 动态 SQL 分页查询
+	* @param obj 查询样板
+	* @param orderBy 排序用字段
+	* @param rowBounds 分页用字段
+	* @return
+	*/
+	#set($queryPageMethod="query"+$_table.className+"Page")
+	@SelectProvider(type = $dynaClassType, method = "$queryPageMethod")
+    public Page<$_table.className> $queryPageMethod(@Param("obj") $_table.className obj,@Param("orderBy") String orderBy,RowBounds rowBounds);
+    
+    /**
+	* 动态 SQL 新增
+	* @param obj 待新增对像，主键不用设值，自动填充。
+	* @return 数据库修改记录数
+	*/
+    #set($addObjMethod="add"+$_table.className)
+    #set($resultType=$primaryKey.javaDataType + ".class")
+    @InsertProvider(type = $dynaClassType, method = "$addObjMethod")
+    public Integer $addObjMethod(@Param("obj")$_table.className obj);
+	
+	/**
+	* 动态 SQL 修改
+	* @param $primaryKey.fieldName 将修改的数据主键 pk
+	* @param obj 修改后数据模版
+	* @return 数据库修改记录数
+	*/
+	#set($updateObjMethod="update"+$_table.className)
+  	@UpdateProvider(type = $dynaClassType, method = "$updateObjMethod")
+    public int $updateObjMethod(@Param("$primaryKey.fieldName") Integer $primaryKey.fieldName , @Param("obj") $_table.className obj);
+
+	/**
+	* 删除
+	* @param $primaryKey.fieldName 将修改的数据主键 pk
+	* @return 数据库修改记录数
+	*/
+    @Delete("DELETE FROM $_table.tableName WHERE $updatePKHolders")
+    public int deleteByPK($primaryKey.javaDataType $primaryKey.fieldName);
+	
+}
